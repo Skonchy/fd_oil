@@ -166,7 +166,7 @@ Citizen.CreateThread(function()
             local loadingDock = processPoints[i]
             if dist <= 5.0 then
                 sleep = 10
-                if dist <= 1.0 then
+                if dist <= 3.5 then
                     Draw2DText("Press G to Process Oil",0.5,0.85)
                     if IsControlJustPressed(1,0x760A9C6F) then -- pressed g
                         print(loadingDock)
@@ -218,7 +218,7 @@ Citizen.CreateThread(function()
             local loadingDock = sellPoints[i]
             if dist <= 5.0 then
                 sleep = 10
-                if dist <= 1.0 then
+                if dist <= 3.5 then
                     Draw2DText("Press G to Sell Oil",0.5,0.85)
                     if IsControlJustPressed(1,0x760A9C6F) then -- pressed g
                         print(loadingDock)
