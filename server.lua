@@ -99,3 +99,14 @@ Citizen.CreateThread(function()
     end
 end)
 
+RegisterServerEvent("RegisterUsableItem:OilRig")
+AddEventHandler("RegisterUsableItem:OilRig", function(source)
+    TriggerClientEvent('ranch:Oilrig', source)
+end)
+
+RegisterServerEvent("RegisterUsableItem:oilprospector")
+AddEventHandler("RegisterUsableItem:oilprospector", function(source)
+    TriggerClientEvent('ranch:checkForOil', source)
+end)
+
+

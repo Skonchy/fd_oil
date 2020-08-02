@@ -166,7 +166,7 @@ Citizen.CreateThread(function()
             local loadingDock = processPoints[i]
             if dist <= 5.0 then
                 sleep = 10
-                if dist <= 3.5 then
+                if dist <= 2.0 then
                     Draw2DText("Press G to Process Oil",0.5,0.85)
                     if IsControlJustPressed(1,0x760A9C6F) then -- pressed g
                         print(loadingDock)
@@ -191,14 +191,14 @@ Citizen.CreateThread(function()
         for k,v in pairs(OilConfig.ProcessNpcs) do
             print("blips for processing")
             local blip = N_0x554d9d53f696d002(1664425300, v[1])
-            SetBlipSprite(blip, -392465725, 1)
+            SetBlipSprite(blip, -272216216, 1)
             SetBlipScale(blip, 0.2)
             Citizen.InvokeNative(0x9CB1A1623062F402, blip, "Oil Refinery")
 	    end
         for k,v in pairs(OilConfig.SellNpcs) do
             local blip = N_0x554d9d53f696d002(1664425300, v[1])
             print("sellNPCS",blip)
-            SetBlipSprite(blip, 1106719664, 1)
+            SetBlipSprite(blip, -426139257, 1)
             SetBlipScale(blip, 0.2)
             Citizen.InvokeNative(0x9CB1A1623062F402, blip, "Oil Export")
         end
@@ -218,7 +218,7 @@ Citizen.CreateThread(function()
             local loadingDock = sellPoints[i]
             if dist <= 5.0 then
                 sleep = 10
-                if dist <= 3.5 then
+                if dist <= 1.0 then
                     Draw2DText("Press G to Sell Oil",0.5,0.85)
                     if IsControlJustPressed(1,0x760A9C6F) then -- pressed g
                         print(loadingDock)
@@ -244,3 +244,86 @@ RegisterCommand("checkForOil", function(src,args,raw)
     local playerPos = GetEntityCoords(player)
     TriggerServerEvent("fd_oil:DowsingForOil")
 end)
+
+RegisterNetEvent('ranch:checkForOil')
+AddEventHandler('ranch:checkForOil', function()
+	local player = PlayerPedId()
+    local playerPos = GetEntityCoords(player)
+	local playerPed = PlayerPedId()
+	TaskStartScenarioInPlace(playerPed, GetHashKey('WORLD_HUMAN_CROUCH_INSPECT'), 10000, true, false, false, false)
+    exports['progressBars']:startUI(10000, "Prospecting For Oil")
+    Citizen.Wait(10000)
+    ClearPedTasksImmediately(PlayerPedId())
+    TriggerServerEvent("fd_oil:DowsingForOil")
+end)
+
+--PUMP MENU PICK UP--
+Citizen.CreateThread(function()
+	while true do
+		Citizen.Wait(1)
+		local x, y, z = table.unpack(GetEntityCoords(PlayerPedId()))
+		
+		
+		local pump = DoesObjectOfTypeExistAtCoords(x, y, z, 1.5, GetHashKey("p_enginefactory01x"), true)
+		
+		if pump then 
+			DrawText("Press G pick up",0.5,0.88)
+			if IsControlJustReleased(0, 0x760A9C6F) then -- g
+				TriggerEvent("ranch:delOilRig")
+			end
+		end
+	end
+end)
+
+--PUMP PLACEMENT--
+local prop1 = nil 
+RegisterNetEvent('ranch:Oilrig')
+AddEventHandler('ranch:Oilrig', function()
+local pumpPos = GetOffsetFromEntityInWorldCoords(player,0.0,5.0,0.0)
+if pump ~= 0 then
+		DeleteObject(pump)
+        SetEntityAsMissionEntity(pump)
+		TriggerEvent("ranch:delOilRig")		
+        pump = 0
+    end
+    local playerPed = PlayerPedId()
+    TaskStartScenarioInPlace(playerPed, GetHashKey('WORLD_HUMAN_CROUCH_INSPECT'), 3000, true, false, false, false)
+    exports['progressBars']:startUI(3000, "Placing Rig")
+    Citizen.Wait(3000)
+    ClearPedTasksImmediately(PlayerPedId())
+    local x,y,z = table.unpack(GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0.0, 2.0, -1.55))
+    prop1 = CreateObject(GetHashKey("p_enginefactory01x"), x, y, z, true, false, true)
+    SetEntityHeading(prop1, GetEntityHeading(PlayerPedId()))
+    PlaceObjectOnGroundProperly(prop1)
+    pump = prop1
+	TriggerServerEvent("fd_oil:CheckForOil",pump,pumpPos)
+	
+end)
+--PUMP MENU--
+AddEventHandler('ranch:OilRigMenu', function()
+local _source = source
+		
+            local playerPed = PlayerPedId()
+			Citizen.Wait(0)
+            ClearPedTasksImmediately(PlayerPedId())
+			WarMenu.OpenMenu('rig')
+            TaskStartScenarioInPlace(playerPed, GetHashKey('WORLD_HUMAN_CROUCH_INSPECT'), -1, true, false, false, false)
+       
+end)
+
+--PUMP DELETE--
+RegisterNetEvent('ranch:delOilRig')
+AddEventHandler('ranch:delOilRig', function()
+if pump ~= nil then 
+DeleteObject(prop1)
+end
+end)
+
+function DrawText(text,x,y)
+    SetTextScale(0.35,0.35)
+    SetTextColor(255,255,255,255)--r,g,b,a
+    SetTextCentre(true)--true,false
+    SetTextDropshadow(1,0,0,0,200)--distance,r,g,b,a
+    SetTextFontForCurrentCommand(0)
+    DisplayText(CreateVarString(10, "LITERAL_STRING", text), x, y)
+end
