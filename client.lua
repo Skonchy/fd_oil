@@ -28,9 +28,9 @@ end
 function getTargetBarrel()
     local pos = GetEntityCoords(PlayerPedId())
     local entityWorld = GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0.0, 1.0, 0.0)
-    local result = GetClosestObjectOfType(entityWorld.x,entityWorld.y,entityWorld.z,1.0,GetHashKey("P_BARREL01AX"),true,true,true)
+    local result = GetClosestObjectOfType(entityWorld.x,entityWorld.y,entityWorld.z,1.0,GetHashKey("P_BARREL01AX"),true,false,true)
     if result == 0 then
-        result = GetClosestObjectOfType(entityWorld.x,entityWorld.y,entityWorld.z,1.0,GetHashKey("P_BARREL04B"),true,true,true)
+        result = GetClosestObjectOfType(entityWorld.x,entityWorld.y,entityWorld.z,1.0,GetHashKey("P_BARREL04B"),true,false,true)
     end
     return result
 end
@@ -55,7 +55,7 @@ function spawnBarrel(pumpjack)
             barrelPos = GetOffsetFromEntityInWorldCoords(pumpjack,0.0,5.0 + offset,0.0)
         end
     end
-    local barrel = CreateObject(hash,barrelPos.x,barrelPos.y,barrelPos.z,true,true,true)
+    local barrel = CreateObject(hash,barrelPos.x,barrelPos.y,barrelPos.z,true,false,true)
     PlaceObjectOnGroundProperly(barrel,true)
 end
 
@@ -84,7 +84,7 @@ function processOil(barrel, npc, h)
             print("Waiting for model "..hash)
             Citizen.Wait(100)
         end
-        local newBarrel = CreateObject(hash,newPos.x,newPos.y,newPos.z,true,true,true)
+        local newBarrel = CreateObject(hash,newPos.x,newPos.y,newPos.z,true,false,true)
         PlaceObjectOnGroundProperly(newBarrel)
         TriggerEvent("redemrp_notification:start", "Your oil has been processed.", 2)
     end
@@ -172,13 +172,13 @@ Citizen.CreateThread(function()
                     Draw2DText("Press G to Process Oil",0.5,0.85)
                     if IsControlJustPressed(1,0x760A9C6F) then -- pressed g
                         print(loadingDock)
-                        local toBeProc = 0
-                        repeat
-                            toBeProc = GetClosestObjectOfType(loadingDock.x,loadingDock.y,loadingDock.z,25.0,GetHashKey("P_BARREL01AX"),true,true,true)
+                        local toBeProc = GetClosestObjectOfType(loadingDock.x,loadingDock.y,loadingDock.z,25.0,GetHashKey("P_BARREL01AX"),true,false,true)
+                        while toBeProc ~= 0 do
                             print("ToBeProc = ",toBeProc)
                             processOil(toBeProc,pos,heading)
                             Citizen.Wait(sleep)
-                        until toBeProc == 0
+                            toBeProc = GetClosestObjectOfType(loadingDock.x,loadingDock.y,loadingDock.z,25.0,GetHashKey("P_BARREL01AX"),true,false,true)
+                        end
                     end
                 end
             end
@@ -222,14 +222,14 @@ Citizen.CreateThread(function()
                     Draw2DText("Press G to Sell Oil",0.5,0.85)
                     if IsControlJustPressed(1,0x760A9C6F) then -- pressed g
                         print(loadingDock)
-                        local toBeSold = 0
-                        repeat
+                        local toBeSold = GetClosestObjectOfType(loadingDock.x,loadingDock.y,loadingDock.z,25.0,GetHashKey("P_BARREL04B"),true,true,true)
+                        while toBeSold ~= 0 do
                             sleep = 3500
-                            toBeSold = GetClosestObjectOfType(loadingDock.x,loadingDock.y,loadingDock.z,25.0,GetHashKey("P_BARREL04B"),true,true,true)
                             print("ToBeSold = ",toBeSold)
                             sellOil(toBeSold)
                             Citizen.Wait(sleep)
-                        until toBeSold == 0
+                            toBeSold = GetClosestObjectOfType(loadingDock.x,loadingDock.y,loadingDock.z,25.0,GetHashKey("P_BARREL04B"),true,true,true)
+                        end
                     end
                 end
             end
