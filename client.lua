@@ -136,16 +136,18 @@ Citizen.CreateThread(function()
     local playerPed = PlayerPedId()
     local isCarrying = false
     while true do
-        if IsControlJustPressed(1,0x760A9C6F) then -- pressed g
-            local barrel = getTargetBarrel()
-            if not isCarrying then
-                print(isCarrying,barrel)
-                AttachEntityToEntity(barrel,playerPed,GetPedBoneIndex(playerPed,11816), 0.0, 1.0, 0, 0, 0, 0, true, true, false, false, 1, true,true,true)
-                isCarrying = true
-            else
-                print(isCarrying,barrel)
-                DetachEntity(barrel,true,true)
-                isCarrying = false
+        local barrel = getTargetBarrel()
+        if barrel ~= 0 then
+            if IsControlJustPressed(1,0x760A9C6F) then -- pressed g
+                if not isCarrying then
+                    print(isCarrying,barrel)
+                    AttachEntityToEntity(barrel,playerPed,GetPedBoneIndex(playerPed,11816), 0.0, 1.0, 0, 0, 0, 0, true, true, false, false, 1, true,true,true)
+                    isCarrying = true
+                else
+                    print(isCarrying,barrel)
+                    DetachEntity(barrel,true,true)
+                    isCarrying = false
+                end
             end
         end
         Citizen.Wait(sleep)
@@ -189,7 +191,6 @@ end)
 Citizen.CreateThread(function()
         Wait(0)
         for k,v in pairs(OilConfig.ProcessNpcs) do
-            print("blips for processing")
             local blip = N_0x554d9d53f696d002(1664425300, v[1])
             SetBlipSprite(blip, -272216216, 1)
             SetBlipScale(blip, 0.2)
@@ -197,7 +198,6 @@ Citizen.CreateThread(function()
 	    end
         for k,v in pairs(OilConfig.SellNpcs) do
             local blip = N_0x554d9d53f696d002(1664425300, v[1])
-            print("sellNPCS",blip)
             SetBlipSprite(blip, -426139257, 1)
             SetBlipScale(blip, 0.2)
             Citizen.InvokeNative(0x9CB1A1623062F402, blip, "Oil Export")
