@@ -138,14 +138,19 @@ Citizen.CreateThread(function()
     while true do
         local barrel = getTargetBarrel()
         if barrel ~= 0 then
+            NetworkRequestControlOfEntity(barrel)
+            while not NetworkHasControlOfEntity(barrel) do
+                print("gib barrel")
+                Citizen.Wait(10)
+            end
             if IsControlJustPressed(1,0x760A9C6F) then -- pressed g
                 if not isCarrying then
-                    print(isCarrying,barrel)
-                    AttachEntityToEntity(barrel,playerPed,GetPedBoneIndex(playerPed,11816), 0.0, 1.0, 0, 0, 0, 0, true, true, false, false, 1, true,true,true)
+                    --AttachEntityToEntity(barrel,playerPed,GetPedBoneIndex(playerPed,11816), 0.0, 1.0, 0, 0, 0, 0, true, true, false, false, 1, true,true,true)
+                    AttachEntityToEntity(barrel, playerPed, GetPedBoneIndex(playerPed,11816), 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, true, true, false, true, 1, true)
+                    print(IsEntityAttached(barrel),GetEntityAttachedTo(barrel),IsEntityAttachedToAnyPed(barrel))
                     isCarrying = true
                 else
-                    print(isCarrying,barrel)
-                    DetachEntity(barrel,true,true)
+                    DetachEntity(GetEntityAttachedTo(playerPed),false,true)
                     isCarrying = false
                 end
             end
