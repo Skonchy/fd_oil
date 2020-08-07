@@ -140,17 +140,16 @@ Citizen.CreateThread(function()
         if barrel ~= 0 then
             NetworkRequestControlOfEntity(barrel)
             while not NetworkHasControlOfEntity(barrel) do
-                print("gib barrel")
                 Citizen.Wait(10)
             end
             if IsControlJustPressed(1,0x760A9C6F) then -- pressed g
+                print(isCarrying,barrel)
                 if not isCarrying then
-                    --AttachEntityToEntity(barrel,playerPed,GetPedBoneIndex(playerPed,11816), 0.0, 1.0, 0, 0, 0, 0, true, true, false, false, 1, true,true,true)
-                    AttachEntityToEntity(barrel, playerPed, GetPedBoneIndex(playerPed,11816), 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, true, true, false, true, 1, true)
-                    print(IsEntityAttached(barrel),GetEntityAttachedTo(barrel),IsEntityAttachedToAnyPed(barrel))
+                    AttachEntityToEntity(barrel,playerPed,GetPedBoneIndex(playerPed,11816), 0.0, 1.0, 0, 0, 0, 0, true, true, false, false, 1, true,true,true)
+                    --AttachEntityToEntity(barrel, playerPed, GetPedBoneIndex(playerPed,11816), 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, true, true, false, true, 1, true)
                     isCarrying = true
                 else
-                    DetachEntity(GetEntityAttachedTo(playerPed),false,true)
+                    DetachEntity(barrel,true,true)
                     isCarrying = false
                 end
             end
@@ -248,6 +247,18 @@ RegisterCommand("checkForOil", function(src,args,raw)
     local player = PlayerPedId()
     local playerPos = GetEntityCoords(player)
     TriggerServerEvent("fd_oil:DowsingForOil")
+end)
+
+RegisterCommand("spawnObj", function(src,args,raw)
+    local player = PlayerPedId()
+    local spawnPos = GetOffsetFromEntityInWorldCoords(player,0.0,1.0,0.0)
+    local obj = GetHashKey(args[1])
+
+    RequestModel(obj)
+    while not HasModelLoaded(obj) do
+        Wait(0)
+    end
+    CreateObject(obj,spawnPos.x,spawnPos.y,spawnPos.z,true,false,true)
 end)
 
 RegisterNetEvent('ranch:checkForOil')
